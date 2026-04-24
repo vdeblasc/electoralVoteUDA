@@ -1,0 +1,17 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+
+# Compilación
+dist/
+*.tsbuildinfo
+
+# Billeteras e Identidades (¡CRÍTICO! Seguridad Blockchain)
+wallet/*
+!wallet/.gitkeep
+
+# Configuración de red (Archivos de Minifabric)
+src/fabric-service/connection.json
+
+# Variables de entorno
+.env
