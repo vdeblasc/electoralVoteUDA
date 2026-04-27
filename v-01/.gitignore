@@ -6,21 +6,14 @@ node_modules/
 # ──────────────────────────────────────────────
 # Hardhat / Solidity
 # ──────────────────────────────────────────────
-# Build artifacts (ABI, bytecode) — se regeneran con `npx hardhat compile`
 artifacts/
-# Caché de compilación
 cache/
-# Typechain generated types
 typechain-types/
 types/
-# Coverage reports
 coverage/
 coverage.json
-# Gas snapshots
 .gas-snapshot
-# Snapshot cheatcodes output
 snapshots/
-# Hardhat deploy output
 deployments/localhost/
 
 # ──────────────────────────────────────────────
@@ -31,7 +24,7 @@ deployments/localhost/
 !.env.example
 
 # ──────────────────────────────────────────────
-# Compilación / Build
+# Build output
 # ──────────────────────────────────────────────
 dist/
 build/
@@ -39,27 +32,24 @@ out/
 bundle/
 
 # ──────────────────────────────────────────────
-# Frontend (React / Next.js / Vite)
+# Frontend
 # ──────────────────────────────────────────────
 .next/
 .nuxt/
 .vite/
 
 # ──────────────────────────────────────────────
-# OS / Sistema Operativo
+# OS
 # ──────────────────────────────────────────────
-# Windows
 Thumbs.db
 ehthumbs.db
 Desktop.ini
-# macOS
 .DS_Store
 ._*
-# Linux
 *~
 
 # ──────────────────────────────────────────────
-# IDEs / Editores
+# IDEs
 # ──────────────────────────────────────────────
 .vscode/
 !.vscode/settings.json
