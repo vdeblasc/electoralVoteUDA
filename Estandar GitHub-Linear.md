@@ -18,15 +18,7 @@ equipo entender el contexto del PR sin necesidad de examinar el código de
 inmediato.
 Consistencia: Seguir estrictamente el formato definido en este documento para
 asegurar la uniformidad en todos los PRs.
-Responsablle:
-GUSTAVO BIOTT
-Elaborado por:
-MAURICIO BIOTT
-Tipo:
-DOCUMENTACION
-Fecha:
-2/Jun/2025
-Estandares - Gestión Github-Jira
+
 
 
 
@@ -42,15 +34,8 @@ también a develop.
 release: Utilizar para Pull Requests que preparan una nueva versión para su
 lanzamiento. Actualmente, estos PRs se dirigen directamente a la rama main
 desde develop.
-Responsablle:
-GUSTAVO BIOTT
-Elaborado por:
-MAURICIO BIOTT
-Tipo:
-DOCUMENTACION
-Fecha:
-2/Jun/2025
-Estandares - Gestión Github-Jira
+
+
 
 
 4. Estándares para Nombres de Ramas (Git Flow)
@@ -77,15 +62,10 @@ feat Para una nueva funcionalidad
 fix Para una corrección de bug o error en producción o desarrollo
 refactor Para cambios de código que no agregan funcionalidad ni corrigen
 bugs
-Responsablle:
-GUSTAVO BIOTT
-Elaborado por:
-MAURICIO BIOTT
-Tipo:
-DOCUMENTACION
-Fecha:
-2/Jun/2025
-Estandares - Gestión Github-Jira
+
+
+
+
 Tipo Uso
 chore Para tareas menores o mantenimiento, como cambios en scripts, configs
 docs Para cambios en documentación
@@ -107,15 +87,6 @@ test: agregar tests para el componente login
 ci: modificar job de despliegue a staging
 perf: optimizar carga de imágenes en galería
 build: agregar script de build para entorno dev
-Responsablle:
-GUSTAVO BIOTT
-Elaborado por:
-MAURICIO BIOTT
-Tipo:
-DOCUMENTACION
-Fecha:
-2/Jun/2025
-Estandares - Gestión Github-Jira
 revert: revertir cambios de la PR anterior
 
 
