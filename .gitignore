@@ -1,0 +1,91 @@
+# ──────────────────────────────────────────────
+# Dependencias
+# ──────────────────────────────────────────────
+node_modules/
+
+# ──────────────────────────────────────────────
+# Hardhat / Solidity
+# ──────────────────────────────────────────────
+# Build artifacts (ABI, bytecode) — se regeneran con `npx hardhat compile`
+artifacts/
+# Caché de compilación
+cache/
+# Typechain generated types
+typechain-types/
+types/
+# Coverage reports
+coverage/
+coverage.json
+# Gas snapshots
+.gas-snapshot
+# Snapshot cheatcodes output
+snapshots/
+# Hardhat deploy output
+deployments/localhost/
+
+# ──────────────────────────────────────────────
+# Environment / Secrets
+# ──────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ──────────────────────────────────────────────
+# Compilación / Build
+# ──────────────────────────────────────────────
+dist/
+build/
+out/
+bundle/
+
+# ──────────────────────────────────────────────
+# Frontend (React / Next.js / Vite)
+# ──────────────────────────────────────────────
+.next/
+.nuxt/
+.vite/
+
+# ──────────────────────────────────────────────
+# OS / Sistema Operativo
+# ──────────────────────────────────────────────
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+# macOS
+.DS_Store
+._*
+# Linux
+*~
+
+# ──────────────────────────────────────────────
+# IDEs / Editores
+# ──────────────────────────────────────────────
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ──────────────────────────────────────────────
+# Logs
+# ──────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ──────────────────────────────────────────────
+# Testing
+# ──────────────────────────────────────────────
+.nyc_output/
+
+# ──────────────────────────────────────────────
+# Misc
+# ──────────────────────────────────────────────
+*.tsbuildinfo
