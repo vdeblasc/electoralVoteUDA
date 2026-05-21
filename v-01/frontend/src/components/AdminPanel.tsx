@@ -20,6 +20,44 @@ export default function AdminPanel({ contract, electionState, onSuccess, onError
   const [voterInput, setVoterInput] = useState('');
   const [txPending, setTxPending] = useState(''); // Guarda qué acción está cargando
 
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [listName, setListName] = useState('');
+  const [position, setPosition] = useState('');
+
+  /**
+   * Agregar Candidato (addCandidate)
+   */
+  const handleAddCandidate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstName.trim() || !lastName.trim() || !listName.trim() || !position.trim()) {
+      onError('❌ Error: Todos los campos del candidato son obligatorios.');
+      return;
+    }
+
+    setTxPending('addCandidate');
+    try {
+      const tx = await contract.addCandidate(firstName.trim(), lastName.trim(), listName.trim(), position.trim());
+      await tx.wait();
+      onSuccess(`✅ Candidato agregado: ${firstName} ${lastName}`);
+      setFirstName('');
+      setLastName('');
+      setListName('');
+      setPosition('');
+    } catch (err: unknown) {
+      const error = err as { code?: number; reason?: string; message?: string };
+      if (error.code === 4001) {
+        onError('Transacción cancelada por el usuario.');
+      } else {
+        const reason = error.reason || error.message || 'Error desconocido';
+        onError(`❌ Error al agregar candidato: ${reason}`);
+      }
+      console.error(err);
+    } finally {
+      setTxPending('');
+    }
+  };
+
   /**
    * Empadronar votante (authorizeVoter)
    */
@@ -105,6 +143,28 @@ export default function AdminPanel({ contract, electionState, onSuccess, onError
 
   return (
     <>
+      {/* Panel: Agregar Candidato (Solo en Preparación) */}
+      {isPrep && (
+        <div className="admin-panel" id="add-candidate-panel">
+          <h3 className="admin-panel__title">
+            <span className="admin-panel__title-icon">👤</span>
+            Agregar Candidato
+          </h3>
+          <p className="admin-panel__description">
+            Registrá a un nuevo candidato. Esto solo es posible antes de abrir la votación.
+          </p>
+          <form onSubmit={handleAddCandidate} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <input type="text" className="admin-panel__input" placeholder="Nombre (Ej: Juan)" value={firstName} onChange={e => setFirstName(e.target.value)} disabled={isAnyTxPending} />
+            <input type="text" className="admin-panel__input" placeholder="Apellido (Ej: Perez)" value={lastName} onChange={e => setLastName(e.target.value)} disabled={isAnyTxPending} />
+            <input type="text" className="admin-panel__input" placeholder="Lista a la q pertenecen (Ej: Lista Azul)" value={listName} onChange={e => setListName(e.target.value)} disabled={isAnyTxPending} />
+            <input type="text" className="admin-panel__input" placeholder="Puesto (Ej: Presidente)" value={position} onChange={e => setPosition(e.target.value)} disabled={isAnyTxPending} />
+            <button className="admin-panel__btn admin-panel__btn--primary" type="submit" disabled={isAnyTxPending}>
+              {txPending === 'addCandidate' ? '⏳ Cargando...' : '➕ Agregar Candidato'}
+            </button>
+          </form>
+        </div>
+      )}
+
       {/* Panel: Empadronar Votante */}
       <div className="admin-panel" id="authorize-panel">
         <h3 className="admin-panel__title">

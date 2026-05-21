@@ -11,7 +11,10 @@ import { Contract } from 'ethers';
 
 export interface Candidate {
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
+  listName: string;
+  position: string;
   voteCount: number;
 }
 
@@ -84,7 +87,11 @@ export default function VoterPanel({
             <div key={candidate.id} className="candidate-card">
               <div className="candidate-card__info">
                 <span className="candidate-card__id">#{candidate.id}</span>
-                <h4 className="candidate-card__name">{candidate.name}</h4>
+                <h4 className="candidate-card__name">{candidate.firstName} {candidate.lastName}</h4>
+                <div className="candidate-card__details" style={{ fontSize: '0.9em', color: '#666', marginBottom: '0.5rem' }}>
+                  <div><strong>Lista:</strong> {candidate.listName}</div>
+                  <div><strong>Puesto:</strong> {candidate.position}</div>
+                </div>
                 <div className="candidate-card__votes">
                   <strong>{candidate.voteCount}</strong> votos
                 </div>

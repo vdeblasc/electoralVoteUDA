@@ -64,23 +64,8 @@ const contractAddress = await voting.getAddress();
 console.log(`✅ Contrato desplegado en: ${contractAddress}`);
 console.log();
 
-// ──────────────────────────────────────────────
-// Paso 2: Agregar candidatos (solo en estado Created)
-// ──────────────────────────────────────────────
-// addCandidate() solo funciona cuando electionState == Created.
-// El owner (signers[0]) es quien ejecuta estas transacciones
-// porque el modifier onlyOwner lo requiere.
-console.log("📝 Agregando candidatos...");
-
-// Candidato A → ID = 0 (primer elemento del array)
-const tx1 = await voting.addCandidate("Candidato A");
-await tx1.wait(); // Esperamos confirmación del bloque
-console.log("   ✅ Candidato A agregado (ID: 0)");
-
-// Candidato B → ID = 1 (segundo elemento del array)
-const tx2 = await voting.addCandidate("Candidato B");
-await tx2.wait();
-console.log("   ✅ Candidato B agregado (ID: 1)");
+// (Omitido para que el administrador agregue candidatos desde el frontend)
+console.log("   (Sin candidatos iniciales. Agregar desde el panel de admin)");
 console.log();
 
 // ──────────────────────────────────────────────
@@ -96,15 +81,11 @@ console.log(`   ✅ Votante autorizado: ${voter1.address}`);
 console.log();
 
 // ──────────────────────────────────────────────
-// Paso 4: Abrir la votación (Created → Open)
+// Paso 4: (Omitido) Abrir la votación
 // ──────────────────────────────────────────────
-// openVoting() cambia el estado del comicio de Created a Open.
-// A partir de este momento, los votantes autorizados pueden votar.
-// ⚠️ Una vez abierto, NO se pueden agregar más candidatos.
-console.log("🗳️  Abriendo votación...");
-const tx4 = await voting.openVoting();
-await tx4.wait();
-console.log("   ✅ ¡Votación abierta! Estado: Open");
+// Se debe abrir manualmente desde el panel de administrador
+// una vez que los candidatos estén registrados.
+console.log("🗳️  Estado inicial: Created (Listo para agregar candidatos)");
 console.log();
 
 // ──────────────────────────────────────────────

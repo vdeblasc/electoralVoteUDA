@@ -40,7 +40,10 @@ contract Voting {
     // ──────────────────────────────────────────────
 
     struct Candidate {
-        string name;
+        string firstName;
+        string lastName;
+        string listName;
+        string position;
         uint256 voteCount;
     }
 
@@ -80,7 +83,7 @@ contract Voting {
     event ElectionStateChanged(ElectionState newState);
 
     /// @notice Emitido cuando se agrega un candidato
-    event CandidateAdded(uint256 indexed candidateId, string name);
+    event CandidateAdded(uint256 indexed candidateId, string firstName, string lastName, string listName, string position);
 
     // ──────────────────────────────────────────────
     // Modifiers
@@ -114,21 +117,33 @@ contract Voting {
 
     /**
      * @notice Agrega un candidato a la elección
-     * @param _name Nombre del candidato
+     * @param _firstName Nombre del candidato
+     * @param _lastName Apellido del candidato
+     * @param _listName Lista a la que pertenece
+     * @param _position Puesto al que postula
      * @dev Solo el owner puede agregar candidatos y solo antes de abrir la votación
      */
-    function addCandidate(string calldata _name) external onlyOwner inState(ElectionState.Created) {
+    function addCandidate(
+        string calldata _firstName,
+        string calldata _lastName,
+        string calldata _listName,
+        string calldata _position
+    ) external onlyOwner inState(ElectionState.Created) {
         // CHECKS
-        require(bytes(_name).length > 0, "El nombre del candidato no puede estar vacio");
+        require(bytes(_firstName).length > 0, "El nombre del candidato no puede estar vacio");
+        require(bytes(_lastName).length > 0, "El apellido del candidato no puede estar vacio");
 
         // EFFECTS
         candidates.push(Candidate({
-            name: _name,
+            firstName: _firstName,
+            lastName: _lastName,
+            listName: _listName,
+            position: _position,
             voteCount: 0
         }));
 
         // Evento para auditoría
-        emit CandidateAdded(candidates.length - 1, _name);
+        emit CandidateAdded(candidates.length - 1, _firstName, _lastName, _listName, _position);
     }
 
     /**
@@ -251,31 +266,55 @@ contract Voting {
     // ──────────────────────────────────────────────
 
     /**
-     * @notice Retorna nombre y cantidad de votos de un candidato
+     * @notice Retorna los detalles y cantidad de votos de un candidato
      * @param _candidateId Índice del candidato
-     * @return name Nombre del candidato
+     * @return firstName Nombre del candidato
+     * @return lastName Apellido del candidato
+     * @return listName Lista del candidato
+     * @return position Puesto del candidato
      * @return voteCount Votos recibidos
      * @dev Función view → sin costo de gas, accesible para cualquier persona
      */
-    function getCandidate(uint256 _candidateId) external view returns (string memory name, uint256 voteCount) {
+    function getCandidate(uint256 _candidateId) external view returns (
+        string memory firstName,
+        string memory lastName,
+        string memory listName,
+        string memory position,
+        uint256 voteCount
+    ) {
         require(_candidateId < candidates.length, "Candidato invalido");
         Candidate storage c = candidates[_candidateId];
-        return (c.name, c.voteCount);
+        return (c.firstName, c.lastName, c.listName, c.position, c.voteCount);
     }
 
     /**
      * @notice Retorna todos los candidatos con sus votos (para la vista de resultados)
-     * @return names Array de nombres
+     * @return firstNames Array de nombres
+     * @return lastNames Array de apellidos
+     * @return listNames Array de listas
+     * @return positions Array de puestos
      * @return voteCounts Array de votos
      * @dev Útil para que el frontend renderice los resultados de una sola llamada
      */
-    function getAllResults() external view returns (string[] memory names, uint256[] memory voteCounts) {
+    function getAllResults() external view returns (
+        string[] memory firstNames,
+        string[] memory lastNames,
+        string[] memory listNames,
+        string[] memory positions,
+        uint256[] memory voteCounts
+    ) {
         uint256 len = candidates.length;
-        names = new string[](len);
+        firstNames = new string[](len);
+        lastNames = new string[](len);
+        listNames = new string[](len);
+        positions = new string[](len);
         voteCounts = new uint256[](len);
 
         for (uint256 i = 0; i < len; i++) {
-            names[i] = candidates[i].name;
+            firstNames[i] = candidates[i].firstName;
+            lastNames[i] = candidates[i].lastName;
+            listNames[i] = candidates[i].listName;
+            positions[i] = candidates[i].position;
             voteCounts[i] = candidates[i].voteCount;
         }
     }

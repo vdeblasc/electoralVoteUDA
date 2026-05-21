@@ -99,12 +99,14 @@ function App() {
       setHasVoted(voted);
 
       // 3. Resultados y candidatos
-      // getAllResults devuelve un array de strings (nombres) y un array de uint256 (votos)
-      const [names, voteCounts] = await votingContract.getAllResults();
+      const [firstNames, lastNames, listNames, positions, voteCounts] = await votingContract.getAllResults();
       
-      const parsedCandidates: Candidate[] = names.map((name: string, index: number) => ({
+      const parsedCandidates: Candidate[] = firstNames.map((firstName: string, index: number) => ({
         id: index,
-        name,
+        firstName,
+        lastName: lastNames[index],
+        listName: listNames[index],
+        position: positions[index],
         voteCount: Number(voteCounts[index])
       }));
       setCandidates(parsedCandidates);
