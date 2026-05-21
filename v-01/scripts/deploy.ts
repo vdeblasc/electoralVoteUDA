@@ -100,7 +100,7 @@ console.log("══════════════════════�
 console.log(`  Dirección del contrato:  ${contractAddress}`);
 console.log(`  Candidatos registrados:  ${candidateCount}`);
 console.log(`  Votantes empadronados:   ${registeredVoters}`);
-console.log(`  Estado del comicio:      Open (listo para votar)`);
+console.log(`  Estado del comicio:      Created (En preparación)`);
 console.log("═══════════════════════════════════════════════════════");
 console.log();
 console.log("💡 Próximos pasos:");
