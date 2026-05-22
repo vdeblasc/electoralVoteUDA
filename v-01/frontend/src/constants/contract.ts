@@ -20,12 +20,13 @@ export const VOTING_ABI = [
   'function owner() view returns (address)',
   'function electionState() view returns (uint8)', // 0: Created, 1: Open, 2: Closed
   'function getCandidateCount() view returns (uint256)',
-  'function getCandidate(uint256 _candidateId) view returns (string name, uint256 voteCount)',
-  'function getAllResults() view returns (string[] names, uint256[] voteCounts)',
+  'function getCandidate(uint256 _candidateId) view returns (string firstName, string lastName, string listName, string position, uint256 voteCount)',
+  'function getAllResults() view returns (string[] firstNames, string[] lastNames, string[] listNames, string[] positions, uint256[] voteCounts)',
   'function isVoterAuthorized(address _voter) view returns (bool)',
   'function hasVoterVoted(address _voter) view returns (bool)',
 
   // Funciones de Escritura (cambian el estado, requieren gas)
+  'function addCandidate(string _firstName, string _lastName, string _listName, string _position)',
   'function authorizeVoter(address _voter)',
   'function openVoting()',
   'function closeVoting()',

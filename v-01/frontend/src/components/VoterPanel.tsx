@@ -11,7 +11,10 @@ import { Contract } from 'ethers';
 
 export interface Candidate {
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
+  listName: string;
+  position: string;
   voteCount: number;
 }
 
@@ -59,6 +62,33 @@ export default function VoterPanel({
 
   const isOpen = electionState === 1;
   const isPrep = electionState === 0;
+  const isClosed = electionState === 2;
+
+  let winnerContent = null;
+  if (isClosed && candidates.length > 0) {
+    const maxVotes = Math.max(...candidates.map(c => c.voteCount));
+    const winners = candidates.filter(c => c.voteCount === maxVotes);
+
+    winnerContent = (
+      <div className="voter-panel__winner-banner" style={{ backgroundColor: '#08031aff', padding: '1.5rem', borderRadius: '8px', border: '1px solid #91d5ff', marginBottom: '1.5rem' }}>
+        <h3 style={{ color: '#ffffffff', margin: '0 0 1rem 0' }}>🏆 Resultados Finales</h3>
+        {maxVotes === 0 ? (
+          <p style={{ margin: 0, fontSize: '1.2rem' }}>Nadie recibió votos.</p>
+        ) : winners.length === 1 ? (
+          <p style={{ margin: 0, fontSize: '1.2rem' }}>
+            El ganador es <strong>{winners[0].firstName} {winners[0].lastName}</strong> ({winners[0].listName}) con <strong>{maxVotes} votos</strong>.
+          </p>
+        ) : (
+          <div style={{ margin: 0, fontSize: '1.2rem' }}>
+            ¡Hay un empate! Los siguientes candidatos obtuvieron <strong>{maxVotes} votos</strong>:
+            <ul style={{ margin: '0.5rem 0 0 0', paddingLeft: '1.5rem' }}>
+              {winners.map(w => <li key={w.id}><strong>{w.firstName} {w.lastName}</strong> ({w.listName})</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // Si no está empadronado, le avisamos
   if (!isAuthorized) {
@@ -75,7 +105,8 @@ export default function VoterPanel({
 
   return (
     <div className="voter-panel">
-      <h3 className="voter-panel__title">Candidatos</h3>
+      <h3 className="voter-panel__title">{isClosed ? 'Resultados Finales' : 'Candidatos'}</h3>
+      {winnerContent}
       {candidates.length === 0 ? (
         <p className="voter-panel__empty">Aún no hay candidatos registrados.</p>
       ) : (
@@ -84,21 +115,25 @@ export default function VoterPanel({
             <div key={candidate.id} className="candidate-card">
               <div className="candidate-card__info">
                 <span className="candidate-card__id">#{candidate.id}</span>
-                <h4 className="candidate-card__name">{candidate.name}</h4>
+                <h4 className="candidate-card__name">{candidate.firstName} {candidate.lastName}</h4>
+                <div className="candidate-card__details" style={{ fontSize: '0.9em', color: '#666', marginBottom: '0.5rem' }}>
+                  <div><strong>Lista:</strong> {candidate.listName}</div>
+                  <div><strong>Puesto:</strong> {candidate.position}</div>
+                </div>
                 <div className="candidate-card__votes">
                   <strong>{candidate.voteCount}</strong> votos
                 </div>
               </div>
-              
+
               <button
                 className="candidate-card__btn"
                 onClick={() => handleVote(candidate.id)}
                 disabled={!isOpen || hasVoted || votingForId !== null}
               >
-                {votingForId === candidate.id ? '⏳ Procesando...' : 
-                 hasVoted ? 'Ya votaste' : 
-                 !isOpen ? (isPrep ? 'Aún no abre' : 'Cerrado') : 
-                 '🗳️ Votar'}
+                {votingForId === candidate.id ? '⏳ Procesando...' :
+                  hasVoted ? 'Ya votaste' :
+                    !isOpen ? (isPrep ? 'Aún no abre' : 'Cerrado') :
+                      '🗳️ Votar'}
               </button>
             </div>
           ))}
