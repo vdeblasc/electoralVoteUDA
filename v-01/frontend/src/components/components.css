@@ -1,156 +1,567 @@
-/* ══════════════════════════════════════════════════════════════
- *  components.css
- * ══════════════════════════════════════════════════════════════
- *  Estilos para StatusBadge, VoterPanel, y refactorizaciones.
- */
-
-/* ── StatusBadge ── */
-.badge {
+﻿.badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.15rem 0.5rem;
-  font-size: 0.6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-radius: var(--radius-xl);
-  margin-right: 0.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
+  gap: 0.42rem;
+  width: fit-content;
+  padding: 0.43rem 0.65rem;
   color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .badge__dot {
-  width: 6px;
-  height: 6px;
+  width: 0.48rem;
+  height: 0.48rem;
   border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
 }
 
-.badge--prep .badge__dot { background-color: #3b82f6; } /* Azul */
-.badge--open .badge__dot { background-color: #10b981; } /* Verde */
-.badge--closed .badge__dot { background-color: #ef4444; } /* Rojo */
+.badge--prep { color: var(--accent-light); }
+.badge--open { color: var(--success); }
+.badge--closed { color: var(--error); }
+.badge--unknown { color: var(--text-muted); }
 
-/* ── VoterPanel ── */
-.voter-panel {
-  padding: 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+.section-card,
+.voter-panel,
+.results-panel {
+  border-radius: var(--radius-xl);
 }
 
-.voter-panel__title {
-  font-size: 1.25rem;
-  font-weight: 700;
+.section-card {
+  padding: 1.15rem;
   margin-bottom: 1rem;
 }
 
-.voter-panel__empty {
+.section-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-card__header h3 {
+  margin-bottom: 0.35rem;
+  font-size: 1.35rem;
+}
+
+.section-card__header p {
+  max-width: 620px;
+  font-size: 0.94rem;
+}
+
+.section-card--admin {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(231, 183, 95, 0.24);
+}
+
+.section-card--admin::after {
+  content: '';
+  position: absolute;
+  width: 11rem;
+  height: 11rem;
+  right: -4rem;
+  top: -5rem;
+  border: 1px solid rgba(231, 183, 95, 0.18);
+  border-radius: 999px;
+}
+
+.admin-console {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-stats div,
+.results-summary__card {
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.admin-stats span,
+.results-summary__card span {
+  display: block;
   color: var(--text-muted);
-  font-style: italic;
-  text-align: center;
-  padding: 2rem 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-stats strong,
+.results-summary__card strong {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+}
+
+.admin-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.admin-form label {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.admin-form label input {
+  margin-top: 0.35rem;
+}
+
+.admin-form .primary-action {
+  grid-column: 1 / -1;
+  min-height: 3rem;
+}
+
+.admin-address-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+}
+
+.secondary-action {
+  padding: 0.8rem 1rem;
+  color: var(--accent-light);
+  background: var(--accent-bg);
+  border: 1px solid rgba(36, 198, 220, 0.34);
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+}
+
+.admin-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.admin-action {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+  min-height: 5.2rem;
+  padding: 1rem;
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: transform var(--duration-normal) var(--ease-out), border-color var(--duration-fast), background var(--duration-fast);
+}
+
+.admin-action span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.admin-action strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.admin-action--open {
+  background: linear-gradient(135deg, rgba(51, 214, 159, 0.14), rgba(255, 255, 255, 0.04));
+}
+
+.admin-action--close {
+  background: linear-gradient(135deg, rgba(255, 102, 128, 0.14), rgba(255, 255, 255, 0.04));
+}
+
+.admin-action:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+}
+
+.admin-action:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.state-pill {
+  padding: 0.38rem 0.6rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.state-pill--active {
+  color: var(--accent-light);
+  border-color: rgba(36, 198, 220, 0.3);
+  background: var(--accent-bg);
+}
+
+.state-pill--success {
+  color: var(--success);
+  border-color: rgba(51, 214, 159, 0.3);
+  background: var(--success-bg);
+}
+
+.tx-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  padding: 0.72rem 0.85rem;
+  color: var(--accent-light);
+  background: var(--accent-bg);
+  border: 1px solid rgba(36, 198, 220, 0.28);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+}
+
+.tx-inline__spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(139, 233, 246, 0.24);
+  border-top-color: var(--accent-light);
+  border-radius: 50%;
+  animation: spin 900ms linear infinite;
+}
+
+.empty-state {
+  padding: 1.4rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+.empty-state strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--text-primary);
+}
+
+.empty-state--compact {
+  padding: 1rem;
+}
+
+.voter-panel {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.section-card--voter-intro {
+  border-color: rgba(36, 198, 220, 0.18);
+}
+
+.voter-access-card {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  border-color: rgba(255, 206, 107, 0.26);
+}
+
+.voter-access-card__mark {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+  color: var(--warning);
+  border: 1px solid rgba(255, 206, 107, 0.35);
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+
+.voter-access-card__steps {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.voter-access-card__steps span {
+  padding: 0.45rem 0.58rem;
+  color: var(--warning);
+  background: var(--warning-bg);
+  border-radius: 999px;
+  font-size: 0.78rem;
+}
+
+.winner-banner {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1.2rem;
+  background: linear-gradient(135deg, rgba(231, 183, 95, 0.18), rgba(36, 198, 220, 0.08));
+  border: 1px solid rgba(231, 183, 95, 0.34);
+  border-radius: var(--radius-xl);
+}
+
+.winner-banner__icon {
+  color: var(--gold);
+  font-size: 2rem;
 }
 
 .candidates-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
   gap: 1rem;
 }
 
 .candidate-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  padding: 1.25rem;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+  min-height: 320px;
+  overflow: hidden;
+  padding: 1rem;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  transition: transform var(--duration-normal) var(--ease-out), border-color var(--duration-fast), box-shadow var(--duration-normal);
+}
+
+.candidate-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  opacity: 0.78;
 }
 
 .candidate-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  border-color: rgba(231, 183, 95, 0.36);
   box-shadow: var(--shadow-md);
-  border-color: var(--accent);
+}
+
+.candidate-card__header,
+.candidate-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.candidate-card__avatar {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  color: var(--ink-dark);
+  background: var(--gold-gradient);
+  border-radius: 18px;
+  font-family: var(--font-display);
+  font-weight: 900;
+}
+
+.candidate-card__id {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
 }
 
 .candidate-card__info {
   flex: 1;
-  margin-bottom: 1rem;
-}
-
-.candidate-card__id {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  padding: 1.25rem 0;
 }
 
 .candidate-card__name {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0.25rem 0 0.5rem 0;
-  color: var(--text-primary);
+  margin-bottom: 0.8rem;
+  font-size: 1.6rem;
 }
 
-.candidate-card__votes {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+.candidate-card__tags {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.candidate-card__tags span {
+  padding: 0.34rem 0.52rem;
+  color: var(--accent-light);
+  background: var(--accent-bg);
+  border: 1px solid rgba(36, 198, 220, 0.2);
+  border-radius: 999px;
+  font-size: 0.78rem;
+}
+
+.candidate-card__explain {
+  font-size: 0.88rem;
 }
 
 .candidate-card__votes strong {
-  font-size: 1.25rem;
-  color: var(--accent-light);
+  display: block;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.candidate-card__votes span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
 }
 
 .candidate-card__btn {
-  width: 100%;
-  padding: 0.75rem;
-  font-family: var(--font-display);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--bg-primary);
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: opacity var(--duration-fast), transform var(--duration-fast);
-}
-
-.candidate-card__btn:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: scale(1.02);
+  width: min(170px, 58%);
+  padding: 0.78rem 0.82rem;
+  color: var(--ink-dark);
+  background: linear-gradient(135deg, var(--accent-light), var(--accent));
+  border-radius: var(--radius-md);
 }
 
 .candidate-card__btn:disabled {
-  opacity: 0.5;
-  background: var(--bg-card-hover);
   color: var(--text-muted);
-  cursor: not-allowed;
-  transform: none;
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-subtle);
 }
 
-.voter-warning {
+.results-panel {
+  position: sticky;
+  top: 1rem;
+  padding: 1rem;
+}
+
+.results-panel__header {
   display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: var(--warning-bg);
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  margin-bottom: 1rem;
+}
+
+.results-panel__title {
+  margin-bottom: 0.3rem;
+  font-size: 1.4rem;
+}
+
+.results-panel__description {
+  font-size: 0.86rem;
+}
+
+.results-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.results-summary__card {
+  padding: 0.65rem;
+}
+
+.results-summary__card strong {
+  font-size: 1.2rem;
+}
+
+.results-panel__empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border-default);
   border-radius: var(--radius-lg);
-  color: var(--warning);
 }
 
-.voter-warning__icon {
-  font-size: 2rem;
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
 }
 
-.voter-warning h3 {
-  margin-bottom: 0.5rem;
-  color: var(--warning);
+.result-row {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
 }
 
-.voter-warning p {
-  font-size: 0.9rem;
-  opacity: 0.9;
+.result-row__rank {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-weight: 900;
+}
+
+.result-row__topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+}
+
+.result-row__topline span,
+.result-row small {
+  color: var(--text-muted);
+}
+
+.result-row__bar {
+  height: 0.45rem;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+}
+
+.result-row__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  transition: width 520ms var(--ease-out);
+}
+
+@media (max-width: 980px) {
+  .results-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .section-card__header,
+  .winner-banner,
+  .voter-access-card,
+  .candidate-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-form,
+  .admin-address-row,
+  .admin-actions,
+  .admin-stats,
+  .results-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .candidate-card__btn {
+    width: 100%;
+  }
 }

@@ -1,232 +1,236 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { Contract, isAddress } from 'ethers';
-
-/**
- * ══════════════════════════════════════════════════════════════
- *  AdminPanel.tsx
- * ══════════════════════════════════════════════════════════════
- *  Panel exclusivo para el Owner. Permite empadronar votantes,
- *  abrir y cerrar la votación.
- */
+import { getHumanError, shortenAddress } from '../utils/transactionMessages';
 
 interface AdminPanelProps {
   contract: Contract;
-  electionState: number | null; // 0 = Created, 1 = Open, 2 = Closed
+  electionState: number | null;
+  candidateCount: number;
+  totalRegisteredVoters: number;
+  totalVotes: number;
   onSuccess: (msg: string) => void;
   onError: (msg: string) => void;
 }
 
-export default function AdminPanel({ contract, electionState, onSuccess, onError }: AdminPanelProps) {
-  const [voterInput, setVoterInput] = useState('');
-  const [txPending, setTxPending] = useState(''); // Guarda qué acción está cargando
+type AdminAction = 'candidate' | 'authorize' | 'open' | 'close' | null;
 
+export default function AdminPanel({
+  contract,
+  electionState,
+  candidateCount,
+  totalRegisteredVoters,
+  totalVotes,
+  onSuccess,
+  onError,
+}: AdminPanelProps) {
+  const [voterInput, setVoterInput] = useState('');
+  const [txPending, setTxPending] = useState<AdminAction>(null);
+  const [txStage, setTxStage] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [listName, setListName] = useState('');
   const [position, setPosition] = useState('');
 
-  /**
-   * Agregar Candidato (addCandidate)
-   */
-  const handleAddCandidate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!firstName.trim() || !lastName.trim() || !listName.trim() || !position.trim()) {
-      onError('❌ Error: Todos los campos del candidato son obligatorios.');
-      return;
-    }
+  const isPrep = electionState === 0;
+  const isOpen = electionState === 1;
+  const isClosed = electionState === 2;
+  const isAnyTxPending = txPending !== null;
 
-    setTxPending('addCandidate');
+  const clearCandidateForm = () => {
+    setFirstName('');
+    setLastName('');
+    setListName('');
+    setPosition('');
+  };
+
+  const runAdminTx = async (action: Exclude<AdminAction, null>, callback: () => Promise<{ wait: () => Promise<unknown> }>, successMessage: string, fallbackError: string) => {
+    setTxPending(action);
+    setTxStage('Esperando confirmación en MetaMask…');
     try {
-      const tx = await contract.addCandidate(firstName.trim(), lastName.trim(), listName.trim(), position.trim());
+      const tx = await callback();
+      setTxStage('Transacción enviada. Esperando que Hardhat mine el bloque…');
       await tx.wait();
-      onSuccess(`✅ Candidato agregado: ${firstName} ${lastName}`);
-      setFirstName('');
-      setLastName('');
-      setListName('');
-      setPosition('');
+      onSuccess(successMessage);
     } catch (err: unknown) {
-      const error = err as { code?: number; reason?: string; message?: string };
-      if (error.code === 4001) {
-        onError('Transacción cancelada por el usuario.');
-      } else {
-        const reason = error.reason || error.message || 'Error desconocido';
-        onError(`❌ Error al agregar candidato: ${reason}`);
-      }
+      onError(getHumanError(err, fallbackError));
       console.error(err);
     } finally {
-      setTxPending('');
+      setTxPending(null);
+      setTxStage('');
     }
   };
 
-  /**
-   * Empadronar votante (authorizeVoter)
-   */
+  const handleAddCandidate = async (e: FormEvent) => {
+    e.preventDefault();
+    const cleanFirstName = firstName.trim();
+    const cleanLastName = lastName.trim();
+    const cleanListName = listName.trim();
+    const cleanPosition = position.trim();
+
+    if (!cleanFirstName || !cleanLastName || !cleanListName || !cleanPosition) {
+      onError('Completá nombre, apellido, lista y cargo antes de registrar al candidato.');
+      return;
+    }
+
+    await runAdminTx(
+      'candidate',
+      () => contract.addCandidate(cleanFirstName, cleanLastName, cleanListName, cleanPosition),
+      `Candidato registrado: ${cleanFirstName} ${cleanLastName}. Ya aparece en la boleta digital.`,
+      'No pudimos registrar al candidato. Revisá que la elección siga en preparación.'
+    );
+    clearCandidateForm();
+  };
+
   const handleAuthorizeVoter = async () => {
     const address = voterInput.trim();
     if (!address) return;
 
-    // Validación estricta con ethers.js
     if (!isAddress(address)) {
-      onError('❌ Error: La dirección ingresada no es válida.');
+      onError('La dirección ingresada no tiene formato Ethereum válido. Debe empezar con 0x y tener 42 caracteres.');
       return;
     }
 
-    setTxPending('authorize');
-    try {
-      const tx = await contract.authorizeVoter(address);
-      await tx.wait(); // Esperar a que se mine la transacción
-      onSuccess(`✅ Votante empadronado: ${address}`);
-      setVoterInput(''); // Limpiamos el input
-    } catch (err: unknown) {
-      const error = err as { code?: number; reason?: string; message?: string };
-      if (error.code === 4001) {
-        onError('Transacción cancelada por el usuario.');
-      } else {
-        const reason = error.reason || error.message || 'Error desconocido';
-        onError(`❌ Error al empadronar: ${reason}`);
-      }
-      console.error(err);
-    } finally {
-      setTxPending('');
-    }
+    await runAdminTx(
+      'authorize',
+      () => contract.authorizeVoter(address),
+      `Votante empadronado: ${shortenAddress(address)}. Esa billetera ya puede votar cuando el comicio esté abierto.`,
+      'No pudimos empadronar ese votante. Verificá que no esté repetido y que la elección no esté cerrada.'
+    );
+    setVoterInput('');
   };
 
-  /**
-   * Abrir Votación (openVoting)
-   */
   const handleOpenVoting = async () => {
-    setTxPending('open');
-    try {
-      const tx = await contract.openVoting();
-      await tx.wait();
-      onSuccess('✅ ¡Votación abierta exitosamente!');
-    } catch (err: unknown) {
-      const error = err as { code?: number; reason?: string; message?: string };
-      if (error.code === 4001) {
-        onError('Transacción cancelada por el usuario.');
-      } else {
-        const reason = error.reason || error.message || 'Error desconocido';
-        onError(`❌ Error al abrir votación: ${reason}`);
-      }
-      console.error(err);
-    } finally {
-      setTxPending('');
-    }
+    await runAdminTx(
+      'open',
+      () => contract.openVoting(),
+      'Votación abierta. Los votantes habilitados ya pueden emitir su voto desde MetaMask.',
+      'No pudimos abrir la votación. Recordá que debe existir al menos un candidato registrado.'
+    );
   };
 
-  /**
-   * Cerrar Votación (closeVoting)
-   */
   const handleCloseVoting = async () => {
-    setTxPending('close');
-    try {
-      const tx = await contract.closeVoting();
-      await tx.wait();
-      onSuccess('✅ Votación cerrada. Los resultados son finales.');
-    } catch (err: unknown) {
-      const error = err as { code?: number; reason?: string; message?: string };
-      if (error.code === 4001) {
-        onError('Transacción cancelada por el usuario.');
-      } else {
-        const reason = error.reason || error.message || 'Error desconocido';
-        onError(`❌ Error al cerrar votación: ${reason}`);
-      }
-      console.error(err);
-    } finally {
-      setTxPending('');
-    }
-  };
+    const confirmed = window.confirm('Cerrar la votación es irreversible. ¿Confirmás que querés finalizar el comicio y congelar resultados?');
+    if (!confirmed) return;
 
-  const isPrep = electionState === 0;
-  const isOpen = electionState === 1;
-  const isAnyTxPending = txPending !== '';
+    await runAdminTx(
+      'close',
+      () => contract.closeVoting(),
+      'Votación cerrada. Los resultados quedaron congelados en el contrato.',
+      'No pudimos cerrar la votación. Verificá que el comicio esté abierto.'
+    );
+  };
 
   return (
-    <>
-      {/* Panel: Agregar Candidato (Solo en Preparación) */}
-      {isPrep && (
-        <div className="admin-panel" id="add-candidate-panel">
-          <h3 className="admin-panel__title">
-            <span className="admin-panel__title-icon">👤</span>
-            Agregar Candidato
-          </h3>
-          <p className="admin-panel__description">
-            Registrá a un nuevo candidato. Esto solo es posible antes de abrir la votación.
-          </p>
-          <form onSubmit={handleAddCandidate} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <input type="text" className="admin-panel__input" placeholder="Nombre (Ej: Juan)" value={firstName} onChange={e => setFirstName(e.target.value)} disabled={isAnyTxPending} />
-            <input type="text" className="admin-panel__input" placeholder="Apellido (Ej: Perez)" value={lastName} onChange={e => setLastName(e.target.value)} disabled={isAnyTxPending} />
-            <input type="text" className="admin-panel__input" placeholder="Lista a la q pertenecen (Ej: Lista Azul)" value={listName} onChange={e => setListName(e.target.value)} disabled={isAnyTxPending} />
-            <input type="text" className="admin-panel__input" placeholder="Puesto (Ej: Presidente)" value={position} onChange={e => setPosition(e.target.value)} disabled={isAnyTxPending} />
-            <button className="admin-panel__btn admin-panel__btn--primary" type="submit" disabled={isAnyTxPending}>
-              {txPending === 'addCandidate' ? '⏳ Cargando...' : '➕ Agregar Candidato'}
+    <div className="admin-console" aria-label="Panel de administrador">
+      <section className="section-card section-card--admin">
+        <div className="section-card__header">
+          <div>
+            <p className="eyebrow">Administrador electoral</p>
+            <h3>Centro de control</h3>
+            <p>Todo cambio sensible se firma en MetaMask y queda registrado en la red local.</p>
+          </div>
+        </div>
+
+        <div className="admin-stats" aria-label="Resumen administrativo">
+          <div><span>Candidatos</span><strong>{candidateCount}</strong></div>
+          <div><span>Empadronados</span><strong>{totalRegisteredVoters}</strong></div>
+          <div><span>Votos emitidos</span><strong>{totalVotes}</strong></div>
+        </div>
+
+        {txStage && (
+          <div className="tx-inline" role="status">
+            <span className="tx-inline__spinner" />
+            {txStage}
+          </div>
+        )}
+      </section>
+
+      <section className="section-card">
+        <div className="section-card__header">
+          <div>
+            <p className="eyebrow">Paso 1</p>
+            <h3>Armar boleta</h3>
+            <p>Registrá candidatos antes de abrir el comicio. Luego la boleta queda bloqueada.</p>
+          </div>
+          <span className={`state-pill ${isPrep ? 'state-pill--active' : ''}`}>{isPrep ? 'Disponible' : 'Bloqueado'}</span>
+        </div>
+
+        {isPrep ? (
+          <form className="admin-form" onSubmit={handleAddCandidate}>
+            <label>
+              Nombre
+              <input type="text" placeholder="Ej: Valentina" value={firstName} onChange={e => setFirstName(e.target.value)} disabled={isAnyTxPending} />
+            </label>
+            <label>
+              Apellido
+              <input type="text" placeholder="Ej: Rivera" value={lastName} onChange={e => setLastName(e.target.value)} disabled={isAnyTxPending} />
+            </label>
+            <label>
+              Lista / agrupación
+              <input type="text" placeholder="Ej: Lista Horizonte" value={listName} onChange={e => setListName(e.target.value)} disabled={isAnyTxPending} />
+            </label>
+            <label>
+              Cargo
+              <input type="text" placeholder="Ej: Presidente del centro" value={position} onChange={e => setPosition(e.target.value)} disabled={isAnyTxPending} />
+            </label>
+            <button className="primary-action" type="submit" disabled={isAnyTxPending}>
+              {txPending === 'candidate' ? 'Registrando candidato…' : 'Agregar a la boleta'}
             </button>
           </form>
-        </div>
-      )}
+        ) : (
+          <div className="empty-state empty-state--compact">
+            <strong>Boleta cerrada para edición</strong>
+            <p>Cuando la elección está abierta o finalizada, el contrato no permite agregar candidatos nuevos.</p>
+          </div>
+        )}
+      </section>
 
-      {/* Panel: Empadronar Votante */}
-      <div className="admin-panel" id="authorize-panel">
-        <h3 className="admin-panel__title">
-          <span className="admin-panel__title-icon">🪪</span>
-          Empadronar Votante
-        </h3>
-        <p className="admin-panel__description">
-          Ingresá la dirección pública (0x...) del votante a autorizar.
-          Solo es posible durante la Preparación o mientras está Abierto.
-        </p>
-        <div className="admin-panel__input-group">
+      <section className="section-card">
+        <div className="section-card__header">
+          <div>
+            <p className="eyebrow">Paso 2</p>
+            <h3>Empadronar votante</h3>
+            <p>Ingresá la wallet del votante. Puede hacerse en preparación o con la votación abierta.</p>
+          </div>
+          <span className={`state-pill ${!isClosed ? 'state-pill--active' : ''}`}>{isClosed ? 'Cerrado' : 'Disponible'}</span>
+        </div>
+
+        <div className="admin-address-row">
           <input
             type="text"
-            className="admin-panel__input"
             placeholder="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
             value={voterInput}
             onChange={(e) => setVoterInput(e.target.value)}
-            disabled={isAnyTxPending || (!isPrep && !isOpen)}
+            disabled={isAnyTxPending || isClosed}
+            aria-label="Dirección de billetera del votante"
           />
-          <button
-            className="admin-panel__btn admin-panel__btn--primary"
-            onClick={handleAuthorizeVoter}
-            disabled={isAnyTxPending || !voterInput.trim() || (!isPrep && !isOpen)}
-            type="button"
-          >
-            {txPending === 'authorize' ? '⏳ Cargando...' : '✅ Empadronar'}
+          <button className="secondary-action" onClick={handleAuthorizeVoter} disabled={isAnyTxPending || !voterInput.trim() || isClosed} type="button">
+            {txPending === 'authorize' ? 'Empadronando…' : 'Autorizar wallet'}
           </button>
         </div>
-      </div>
+      </section>
 
-      {/* Panel: Control del Comicio */}
-      <div className="admin-panel" id="election-control-panel">
-        <h3 className="admin-panel__title">
-          <span className="admin-panel__title-icon">⚙️</span>
-          Control del Comicio
-        </h3>
-        <p className="admin-panel__description">
-          Gestioná el ciclo de vida de la elección. 
-          El cierre es <strong>irreversible</strong>.
-        </p>
-        <div className="admin-panel__actions">
-          <button
-            className="admin-panel__btn admin-panel__btn--open"
-            onClick={handleOpenVoting}
-            disabled={isAnyTxPending || !isPrep} // Solo si está en preparación (0)
-            type="button"
-          >
-            <span className="admin-panel__btn-icon">🟢</span>
-            {txPending === 'open' ? 'Cargando...' : 'Abrir Votación'}
+      <section className="section-card">
+        <div className="section-card__header">
+          <div>
+            <p className="eyebrow">Paso 3</p>
+            <h3>Ciclo del comicio</h3>
+            <p>Abrí la votación cuando la boleta esté lista. Cerrarla congela resultados de forma irreversible.</p>
+          </div>
+        </div>
+
+        <div className="admin-actions">
+          <button className="admin-action admin-action--open" onClick={handleOpenVoting} disabled={isAnyTxPending || !isPrep} type="button">
+            <span>Activar urna</span>
+            <strong>{txPending === 'open' ? 'Abriendo…' : 'Abrir votación'}</strong>
           </button>
-          
-          <button
-            className="admin-panel__btn admin-panel__btn--close"
-            onClick={handleCloseVoting}
-            disabled={isAnyTxPending || !isOpen} // Solo si está abierta (1)
-            type="button"
-          >
-            <span className="admin-panel__btn-icon">🔴</span>
-            {txPending === 'close' ? 'Cargando...' : 'Cerrar Votación'}
+          <button className="admin-action admin-action--close" onClick={handleCloseVoting} disabled={isAnyTxPending || !isOpen} type="button">
+            <span>Cierre irreversible</span>
+            <strong>{txPending === 'close' ? 'Cerrando…' : 'Cerrar comicio'}</strong>
           </button>
         </div>
-      </div>
-    </>
+      </section>
+    </div>
   );
 }

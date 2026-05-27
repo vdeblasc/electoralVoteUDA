@@ -37,7 +37,7 @@ const signers = await ethers.getSigners();
 const [owner, voter1] = signers;
 
 console.log("═══════════════════════════════════════════════════════");
-console.log("       🗳️  SISTEMA DE VOTACIÓN BLOCKCHAIN — UDA       ");
+console.log("       🗳️  SISTEMA DE VOTACIÓN BLOCKCHAIN — ACONCAGUA  ");
 console.log("═══════════════════════════════════════════════════════");
 console.log();
 console.log(`📋 Owner (administrador):  ${owner.address}`);
@@ -105,6 +105,6 @@ console.log("══════════════════════�
 console.log();
 console.log("💡 Próximos pasos:");
 console.log("   1. Copia la dirección del contrato al frontend (.env)");
-console.log("   2. Conecta MetaMask a http://127.0.0.1:8545 (Chain ID: 1337)");
+console.log("   2. Conecta MetaMask a http://127.0.0.1:8545 (Chain ID: 31337)");
 console.log("   3. Importa la cuenta del Voter1 en MetaMask con su clave privada");
 console.log();

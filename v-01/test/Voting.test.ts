@@ -77,8 +77,8 @@ async function readyToVoteFixture() {
   const { voting, owner, voter1, voter2, outsider } = await deployFixture();
 
   // Configurar candidatos (solo posible en estado Created)
-  await voting.addCandidate("Candidato A");
-  await voting.addCandidate("Candidato B");
+  await voting.addCandidate("Candidato", "A", "Lista Azul", "Presidente");
+  await voting.addCandidate("Candidato", "B", "Lista Verde", "Presidente");
 
   // Empadronar voter1 (autorizarlo en el padrón electoral)
   await voting.authorizeVoter(voter1.address);
@@ -134,15 +134,17 @@ describe("Voting", function () {
     it("debería permitir al owner agregar candidatos", async function () {
       const { voting } = await networkHelpers.loadFixture(deployFixture);
 
-      await voting.addCandidate("Candidato A");
-      await voting.addCandidate("Candidato B");
+      await voting.addCandidate("Candidato", "A", "Lista Azul", "Presidente");
+      await voting.addCandidate("Candidato", "B", "Lista Verde", "Presidente");
 
       // Verificamos que se registraron 2 candidatos
       expect(await voting.getCandidateCount()).to.equal(2n);
 
       // Verificamos los datos del primer candidato
-      const [name, voteCount] = await voting.getCandidate(0);
-      expect(name).to.equal("Candidato A");
+      const [firstName, lastName, listName, position, voteCount] = await voting.getCandidate(0);
+      expect(`${firstName} ${lastName}`).to.equal("Candidato A");
+      expect(listName).to.equal("Lista Azul");
+      expect(position).to.equal("Presidente");
       expect(voteCount).to.equal(0n);
     });
 
@@ -152,7 +154,7 @@ describe("Voting", function () {
       // ¿Por qué validamos esto?
       // Un candidato sin nombre sería confuso en la interfaz.
       // El contrato hace: require(bytes(_name).length > 0)
-      await expect(voting.addCandidate(""))
+      await expect(voting.addCandidate("", "A", "Lista Azul", "Presidente"))
         .to.be.revertedWith("El nombre del candidato no puede estar vacio");
     });
 
@@ -162,7 +164,7 @@ describe("Voting", function () {
       // Si cualquiera pudiera, la elección no tendría validez.
       const { voting, outsider } = await networkHelpers.loadFixture(deployFixture);
 
-      await expect(voting.connect(outsider).addCandidate("Intruso"))
+      await expect(voting.connect(outsider).addCandidate("Intruso", "SinPermiso", "Lista X", "Presidente"))
         .to.be.revertedWith("Solo el administrador puede realizar esta accion");
     });
 
@@ -170,7 +172,7 @@ describe("Voting", function () {
       const { voting } = await networkHelpers.loadFixture(readyToVoteFixture);
 
       // El comicio ya está Open → addCandidate requiere Created
-      await expect(voting.addCandidate("Candidato Tardío"))
+      await expect(voting.addCandidate("Candidato", "Tardío", "Lista Tarde", "Presidente"))
         .to.be.revertedWith("El comicio no esta en el estado correcto");
     });
   });
@@ -226,7 +228,7 @@ describe("Voting", function () {
     it("debería permitir abrir la votación con candidatos", async function () {
       const { voting } = await networkHelpers.loadFixture(deployFixture);
 
-      await voting.addCandidate("Candidato A");
+      await voting.addCandidate("Candidato", "A", "Lista Azul", "Presidente");
       await voting.openVoting();
 
       // ElectionState.Open == 1n
@@ -273,8 +275,8 @@ describe("Voting", function () {
       await voting.connect(voter1).vote(0);
 
       // Verificamos que el voto se registró correctamente
-      const [name, voteCount] = await voting.getCandidate(0);
-      expect(name).to.equal("Candidato A");
+      const [firstName, lastName, , , voteCount] = await voting.getCandidate(0);
+      expect(`${firstName} ${lastName}`).to.equal("Candidato A");
       expect(voteCount).to.equal(1n); // ¡El conteo subió!
 
       // Verificamos que el votante quedó marcado como "ya votó"
@@ -349,8 +351,10 @@ describe("Voting", function () {
     it("debería retornar los datos de un candidato con getCandidate()", async function () {
       const { voting } = await networkHelpers.loadFixture(readyToVoteFixture);
 
-      const [name, voteCount] = await voting.getCandidate(0);
-      expect(name).to.equal("Candidato A");
+      const [firstName, lastName, listName, position, voteCount] = await voting.getCandidate(0);
+      expect(`${firstName} ${lastName}`).to.equal("Candidato A");
+      expect(listName).to.equal("Lista Azul");
+      expect(position).to.equal("Presidente");
       expect(voteCount).to.equal(0n);
     });
 
@@ -360,11 +364,13 @@ describe("Voting", function () {
       // voter1 vota por Candidato B (ID: 1)
       await voting.connect(voter1).vote(1);
 
-      const [names, voteCounts] = await voting.getAllResults();
+      const [firstNames, lastNames, listNames, positions, voteCounts] = await voting.getAllResults();
 
       // Verificamos ambos candidatos
-      expect(names[0]).to.equal("Candidato A");
-      expect(names[1]).to.equal("Candidato B");
+      expect(`${firstNames[0]} ${lastNames[0]}`).to.equal("Candidato A");
+      expect(`${firstNames[1]} ${lastNames[1]}`).to.equal("Candidato B");
+      expect(listNames[0]).to.equal("Lista Azul");
+      expect(positions[1]).to.equal("Presidente");
       expect(voteCounts[0]).to.equal(0n);  // Sin votos
       expect(voteCounts[1]).to.equal(1n);  // 1 voto de voter1
     });
