@@ -1,45 +1,24 @@
-import './components.css'; // Asumimos un archivo CSS para los componentes
-
-/**
- * ══════════════════════════════════════════════════════════════
- *  StatusBadge.tsx
- * ══════════════════════════════════════════════════════════════
- *  Muestra visualmente el estado del comicio (Created, Open, Closed)
- *  usando colores semánticos.
- */
+﻿import './components.css';
 
 interface StatusBadgeProps {
-  status: number | null; // 0 = Created, 1 = Open, 2 = Closed
+  status: number | null;
 }
 
+const STATUS_COPY: Record<number, { label: string; className: string }> = {
+  0: { label: 'Preparación', className: 'badge--prep' },
+  1: { label: 'Abierto', className: 'badge--open' },
+  2: { label: 'Finalizado', className: 'badge--closed' },
+};
+
 export default function StatusBadge({ status }: StatusBadgeProps) {
-  if (status === null) return null;
+  if (status === null) return <div className="badge badge--unknown">Sin estado</div>;
 
-  let label = '';
-  let className = 'badge';
-
-  switch (status) {
-    case 0:
-      label = 'PREPARACIÓN';
-      className += ' badge--prep';
-      break;
-    case 1:
-      label = 'ABIERTO';
-      className += ' badge--open';
-      break;
-    case 2:
-      label = 'FINALIZADO';
-      className += ' badge--closed';
-      break;
-    default:
-      label = 'DESCONOCIDO';
-      className += ' badge--unknown';
-  }
+  const current = STATUS_COPY[status] ?? { label: 'Desconocido', className: 'badge--unknown' };
 
   return (
-    <div className={className}>
-      <span className="badge__dot"></span>
-      {label}
+    <div className={`badge ${current.className}`} aria-label={`Estado del comicio: ${current.label}`}>
+      <span className="badge__dot" aria-hidden="true" />
+      {current.label}
     </div>
   );
 }

@@ -24,6 +24,8 @@ export const VOTING_ABI = [
   'function getAllResults() view returns (string[] firstNames, string[] lastNames, string[] listNames, string[] positions, uint256[] voteCounts)',
   'function isVoterAuthorized(address _voter) view returns (bool)',
   'function hasVoterVoted(address _voter) view returns (bool)',
+  'function totalVotes() view returns (uint256)',
+  'function totalRegisteredVoters() view returns (uint256)',
 
   // Funciones de Escritura (cambian el estado, requieren gas)
   'function addCandidate(string _firstName, string _lastName, string _listName, string _position)',
