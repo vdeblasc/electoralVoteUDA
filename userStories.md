@@ -1,4 +1,4 @@
-# Historias de Usuario — Sistema de Votación Blockchain (UDA)
+# Historias de Usuario — Sistema de Votación Blockchain (Aconcagua)
 
 Historias de usuario extraídas del análisis del proyecto integrador para la cátedra de Base de Datos Avanzada.
 

@@ -1,73 +1,62 @@
-# React + TypeScript + Vite
+﻿# Frontend — Aconcagua Civic Ledger
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interfaz React/TypeScript para el sistema `electoralVoteUDA`. Está diseñada como una urna digital moderna: clara para usuarios no técnicos, con rol administrador/votante visible, feedback de MetaMask y resultados públicos.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js LTS
+- MetaMask
+- Contrato `Voting.sol` desplegado en Hardhat Local
 
-## React Compiler
+## Variables de entorno
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Crear o actualizar `frontend/.env`:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_CONTRACT_ADDRESS="0x..."
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La dirección sale del deploy:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```powershell
+cd ../
+npx hardhat run scripts/deploy.ts --network localNode
 ```
+
+## Desarrollo
+
+```powershell
+npm install
+npm run dev
+```
+
+Abrir:
+
+```text
+http://localhost:5173
+```
+
+## Validación
+
+```powershell
+npm run build
+npm run lint
+```
+
+## Estructura visual
+
+- `src/App.tsx`: conexión wallet, lectura del contrato, estado global y layout.
+- `src/components/AdminPanel.tsx`: formulario de candidatos, empadronamiento y control del comicio.
+- `src/components/VoterPanel.tsx`: estado del votante, boleta y acción de voto.
+- `src/components/ResultsPanel.tsx`: conteo público y participación.
+- `src/components/StatusBadge.tsx`: estado visual Created/Open/Closed.
+- `src/utils/transactionMessages.ts`: helpers para direcciones cortas y errores entendibles.
+- `src/index.css` y `src/App.css`: tokens, layout y estética Aconcagua Civic Ledger.
+
+## Uso esperado
+
+1. Administrador conecta la cuenta owner.
+2. Agrega candidatos y empadrona votantes.
+3. Abre la votación.
+4. Votante empadronado conecta MetaMask y vota.
+5. Administrador cierra el comicio y todos ven resultados agregados.
